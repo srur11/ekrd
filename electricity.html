@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="ku">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>هەژمار کردنی تێچووی کارەبا</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f0f4f8;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+.container {
+    max-width: 800px;
+    margin: 20px auto;
+    background: #fff;
+    padding: 20px 30px;
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+    flex: 1;
+}
+h1 {
+    text-align: center;
+    color: #333;
+}
+.card {
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+}
+.input-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 12px;
+    align-items: center;
+}
+.input-group label {
+    flex: 1 0 120px;
+    font-weight: bold;
+}
+.input-group input, .input-group select {
+    flex: 2 0 150px;
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+.radio-group {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex: 2 0 150px;
+}
+button {
+    padding: 10px 20px;
+    border: none;
+    background: #007BFF;
+    color: #fff;
+    font-size: 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 10px;
+    width: 100%;
+}
+button:hover {
+    background: #0056b3;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    overflow-x: auto;
+}
+table, th, td {
+    border: 1px solid #ddd;
+}
+th, td {
+    padding: 10px;
+    text-align: center;
+}
+th {
+    background: #f5f5f5;
+}
+.result {
+    margin-top: 20px;
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+}
+
+/* Confirmation Modal */
+#confirmationModal {
+    display: none; /* hidden by default */
+    position: fixed;
+    top:0; left:0;
+    width:100%; 
+    height:100%;
+    background: rgba(0,0,0,0.4);
+    justify-content: center;
+    align-items: center;
+    padding: 15px;
+    box-sizing: border-box;
+}
+#confirmationModal .modal-content {
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 90%;
+    text-align: center;
+    box-sizing: border-box;
+}
+#confirmationModal button {
+    margin-top: 10px;
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: none;
+    background: #007BFF;
+    color: #fff;
+    cursor: pointer;
+    max-width: 100%;
+}
+
+/* Footer */
+footer {
+    text-align: center;
+    padding: 15px;
+    background: #f9f9f9;
+    font-size: 14px;
+    color: #333;
+}
+.snapchat-btn {
+    display: inline-block;
+    padding: 8px 16px;
+    margin-top: 5px;
+    border-radius: 6px;
+    background: #00FFFC;
+    color: #000;
+    text-decoration: none;
+    font-weight: bold;
+}
+.snapchat-btn:hover {
+    background: #00d1d1;
+}
+
+@media (max-width: 600px) {
+    .input-group {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .input-group label, .input-group input, .input-group select {
+        flex: 1 0 100%;
+    }
+    button {
+        width: 100%;
+    }
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>هەژمار کردنی تێچووی کارەبا</h1>
+
+    <div class="card">
+        <div class="input-group">
+            <label>جۆری کەلووپەل:</label>
+            <input type="text" id="itemName" placeholder="گڵۆپ، سەلاجە، تیڤی">
+        </div>
+
+        <div class="input-group">
+            <label>جۆری هێرش:</label>
+            <div class="radio-group">
+                <label><input type="radio" name="powerType" value="watts" checked> وات</label>
+                <label><input type="radio" name="powerType" value="amps"> ئەمپێر</label>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label>بڕی بەکار هێنان:</label>
+            <input type="number" id="powerValue" placeholder="100">
+        </div>
+
+        <div class="input-group">
+            <label>کات بەکارھێنانی:</label>
+            <input type="number" id="hoursValue" placeholder="6">
+        </div>
+
+        <div class="input-group">
+            <label>ماوە:</label>
+            <select id="periodSelect">
+                <option value="day">لە ڕۆژێکدا</option>
+                <option value="week">لە ھەفتەیەکدا</option>
+                <option value="month">لە مانگێکدا</option>
+            </select>
+        </div>
+
+        <button onclick="addItem()">زیادکردنی کەلووپەلی تر</button>
+    </div>
+
+    <table id="itemsTable">
+        <thead>
+            <tr>
+                <th>ناوی کەلوپەل</th>
+                <th>بڕی بەکار هێندراو</th>
+                <th>کات</th>
+                <th>ماوەی بەکارهێنان</th>
+                <th>kWh مانگانە</th>
+                <th>سڕینەوە</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+
+    <button onclick="calculateBill()">هەژمار کردنی بڕی بەکارهێندراو</button>
+
+    <div class="result" id="result"></div>
+</div>
+
+<!-- Confirmation Modal -->
+<div id="confirmationModal">
+    <div class="modal-content">
+        <p>سوپاس! ئایتمەکە زیاد کرا.</p>
+        <button onclick="closeModal()">باشە</button>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer>
+    <div>© JS made by Srur Mohamed Ali</div>
+    <a class="snapchat-btn" href="https://www.snapchat.com/add/srur_73?share_id=Bqfzda8V1Ss&locale=en-US" target="_blank">Snapchat</a>
+</footer>
+
+<script>
+const voltage = 220;
+let items = [];
+
+function addItem() {
+    const name = document.getElementById('itemName').value.trim();
+    const powerType = document.querySelector('input[name="powerType"]:checked').value;
+    const powerValue = parseFloat(document.getElementById('powerValue').value);
+    const hours = parseFloat(document.getElementById('hoursValue').value);
+    const period = document.getElementById('periodSelect').value;
+
+    if (!name || isNaN(powerValue) || isNaN(hours)) {
+        alert("تکایە هەموو خانەکان پڕ بکەوە بە شێوەیەکی دروست");
+        return;
+    }
+
+    let kW = (powerType === 'watts') ? powerValue / 1000 : (powerValue * voltage) / 1000;
+
+    let monthlyHours = hours;
+    if (period === 'day') monthlyHours *= 30;
+    else if (period === 'week') monthlyHours *= 4.345;
+
+    const kWh = parseFloat((kW * monthlyHours).toFixed(2));
+
+    items.push({name, powerType, powerValue, hours, period, kWh});
+    renderTable();
+    clearInputs();
+
+    // Show confirmation modal
+    document.getElementById('confirmationModal').style.display = 'flex';
+}
+
+function renderTable() {
+    const tbody = document.querySelector('#itemsTable tbody');
+    tbody.innerHTML = '';
+    items.forEach((item, index) => {
+        const row = `<tr>
+            <td>${item.name}</td>
+            <td>${item.powerValue} ${item.powerType}</td>
+            <td>${item.hours}</td>
+            <td>${item.period}</td>
+            <td>${item.kWh}</td>
+            <td><button onclick="removeItem(${index})">سڕینەوە</button></td>
+        </tr>`;
+        tbody.innerHTML += row;
+    });
+}
+
+function removeItem(index) {
+    items.splice(index, 1);
+    renderTable();
+}
+
+function calculateBill() {
+    if (items.length === 0) {
+        alert("تکایە بەلایەنی کەم کەلووپەلێک زیاد بکە");
+        return;
+    }
+
+    let totalKWh = items.reduce((sum, item) => sum + item.kWh, 0);
+    totalKWh = parseFloat(totalKWh.toFixed(2));
+
+    const pricePerKWh = 72;
+    let bill = totalKWh * pricePerKWh;
+
+    document.getElementById('result').innerHTML = 
+        `کۆی مانگانەی kWh: <strong>${totalKWh}</strong><br>بڕی پارەی پێشبینیکراو: <strong>${bill.toLocaleString()} IQD</strong>`;
+}
+
+function clearInputs() {
+    document.getElementById('itemName').value = '';
+    document.getElementById('powerValue').value = '';
+    document.getElementById('hoursValue').value = '';
+    document.getElementById('periodSelect').value = 'day';
+}
+
+function closeModal() {
+    document.getElementById('confirmationModal').style.display = 'none';
+}
+</script>
+</body>
+</html>
